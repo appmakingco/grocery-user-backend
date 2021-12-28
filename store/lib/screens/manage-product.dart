@@ -8,7 +8,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:store/screens/login.dart';
 
 class ManageProductScreen extends StatefulWidget {
-  const ManageProductScreen({Key? key}) : super(key: key);
+  var canEdit = false;
+  var product = {};
+
+  ManageProductScreen({
+    Key? key,
+    required this.canEdit,
+    required this.product,
+  }) : super(key: key);
 
   @override
   _ManageProductScreenState createState() => _ManageProductScreenState();
@@ -50,6 +57,28 @@ class _ManageProductScreenState extends State<ManageProductScreen> {
     });
   }
 
+  update() {
+    _db.collection("products").doc(widget.product["id"]).update({
+      "title": _titleCtrl.text,
+      "price": _priceCtrl.text,
+      "categoryId": _selectedId,
+      "desc": _descCtrl.text,
+      "imageURL": imgURL
+    }).then((r) {
+      Get.back();
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+  delete() {
+    _db.collection("products").doc(widget.product["id"]).delete().then((r) {
+      Get.back();
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
   uploadImage() async {
     var picker = ImagePicker();
     var pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -83,6 +112,15 @@ class _ManageProductScreenState extends State<ManageProductScreen> {
     // TODO: implement initState
     super.initState();
     fetchCategories();
+    if (widget.canEdit) {
+      _titleCtrl.text = widget.product["title"];
+      _priceCtrl.text = widget.product["price"].toString();
+      _descCtrl.text = widget.product["desc"];
+      _selectedId = widget.product["categoryId"];
+      imgURL = widget.product["imageURL"] != null
+          ? widget.product["imageURL"]
+          : 'https://picsum.photos/120/120';
+    }
   }
 
   @override
@@ -90,7 +128,7 @@ class _ManageProductScreenState extends State<ManageProductScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text("Manage Product"),
+        title: Text("${widget.canEdit ? 'Edit' : 'Add'} Product"),
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -98,7 +136,7 @@ class _ManageProductScreenState extends State<ManageProductScreen> {
           child: Column(
             children: [
               GestureDetector(
-                onTap: (){
+                onTap: () {
                   uploadImage();
                 },
                 child: CircleAvatar(
@@ -172,16 +210,23 @@ class _ManageProductScreenState extends State<ManageProductScreen> {
                     primary: Colors.green,
                   ),
                   child: Text(
-                    "Save Changes",
+                    "${widget.canEdit ? 'Update' : 'Add'} Product",
                     style: TextStyle(
                       fontSize: 16,
                     ),
                   ),
                   onPressed: () {
-                    add();
+                    widget.canEdit ? update() : add();
                   },
                 ),
               ),
+              widget.canEdit
+                  ? TextButton(
+                      child: Text("Delete"),
+                      onPressed: () {
+                        delete();
+                      })
+                  : Container()
             ],
           ),
         ),

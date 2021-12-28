@@ -1,62 +1,39 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store/screens/categories.dart';
 import 'package:store/screens/manage-product.dart';
 
-class ProductsScreen extends StatelessWidget {
-  ProductsScreen({Key? key}) : super(key: key);
-  final List _products = [
-    {
-      "imageURL": "assets/images/products/1.jpg",
-      "title": "Carrot",
-      "price": 40.0,
-    },
-    {
-      "imageURL": "assets/images/products/2.jpg",
-      "title": "Gourd",
-      "price": 30.0,
-    },
-    {
-      "imageURL": "assets/images/products/3.jpg",
-      "title": "Meat",
-      "price": 400.0,
-    },
-    {
-      "imageURL": "assets/images/products/4.jpg",
-      "title": "Lettuce",
-      "price": 60.0,
-    },
-    {
-      "imageURL": "assets/images/products/5.jpg",
-      "title": "Meat Big Piece",
-      "price": 320.0,
-    },
-    {
-      "imageURL": "assets/images/products/6.jpg",
-      "title": "Pomegranate",
-      "price": 180.0,
-    },
-    {
-      "imageURL": "assets/images/products/7.jpg",
-      "title": "Strawberry",
-      "price": 540.0,
-    },
-    {
-      "imageURL": "assets/images/products/8.jpg",
-      "title": "Orange",
-      "price": 170.0,
-    },
-    {
-      "imageURL": "assets/images/products/9.jpg",
-      "title": "spinach",
-      "price": 70.0,
-    },
-    {
-      "imageURL": "assets/images/products/10.jpg",
-      "title": "Cabbage",
-      "price": 26.0,
-    },
-  ];
+class ProductsScreen extends StatefulWidget {
+  const ProductsScreen({Key? key}) : super(key: key);
+
+  @override
+  _ProductsScreenState createState() => _ProductsScreenState();
+}
+
+class _ProductsScreenState extends State<ProductsScreen> {
+  FirebaseFirestore _db = FirebaseFirestore.instance;
+  var _products = [];
+
+  fetchProducts() {
+    _db.collection("products").snapshots().listen((event) {
+      _products.clear();
+      var _tmp = [];
+      event.docs.forEach((product) {
+        _tmp.add({"id": product.id, ...product.data()});
+      });
+      setState(() {
+        _products = _tmp;
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchProducts();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +44,12 @@ class ProductsScreen extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () {
-              Get.to(ManageProductScreen());
+              Get.to(
+                ManageProductScreen(
+                  canEdit: false,
+                  product: {},
+                ),
+              );
             },
           )
         ],
@@ -90,11 +72,12 @@ class ProductsScreen extends StatelessWidget {
                     title: Text("${_products[index]["title"]}"),
                     subtitle: Text("${_products[index]["price"]}"),
                     trailing: IconButton(
-                      icon: Icon(
-                        Icons.edit_outlined,
-                      ),
+                      icon: Icon(Icons.edit_outlined),
                       onPressed: () {
-                        Get.to(ManageProductScreen());
+                        Get.to(ManageProductScreen(
+                          canEdit: true,
+                          product: _products[index],
+                        ));
                       },
                     ),
                   );
