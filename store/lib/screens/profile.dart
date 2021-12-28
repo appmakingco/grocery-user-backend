@@ -25,7 +25,6 @@ class ProfileScreen extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.all(32.0),
           width: double.infinity,
-          height: double.infinity,
           child: Column(
             children: [
               CircleAvatar(
@@ -92,6 +91,7 @@ class ProfileScreen extends StatelessWidget {
               SizedBox(height: 20),
               TextButton(
                 onPressed: () {
+                  logout();
                   Get.offAll(LoginScreen());
                 },
                 child: Text("Logout"),
