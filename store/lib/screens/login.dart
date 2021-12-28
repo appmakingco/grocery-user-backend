@@ -1,35 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:store/controllers/auth.dart';
 import 'package:store/screens/tabs.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({Key? key}) : super(key: key);
 
-  FirebaseAuth _auth = FirebaseAuth.instance;
+  AuthController _auth = AuthController();
+
   TextEditingController _emailCtrl = TextEditingController();
   TextEditingController _passwordCtrl = TextEditingController();
-
-  login() {
-    var emailText = (_emailCtrl.text).trim().toLowerCase();
-    var passwordText = _passwordCtrl.text;
-    _auth
-        .signInWithEmailAndPassword(email: emailText, password: passwordText)
-        .then((res) {
-      print(res);
-      Get.offAll(TabsScreen());
-    }).catchError((e) {
-      print(e);
-      Get.showSnackbar(
-        GetBar(
-          message: "${e.toString()}",
-          duration: Duration(
-            seconds: 2,
-          ),
-        ),
-      );
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +66,7 @@ class LoginScreen extends StatelessWidget {
                 child: ElevatedButton(
                   child: Text("LOGIN"),
                   onPressed: () {
-                    login();
+                    _auth.login(_emailCtrl.text, _passwordCtrl.text);
                     // Get.offAll(TabsScreen());
                   },
                 ),
