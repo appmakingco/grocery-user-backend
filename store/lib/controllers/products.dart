@@ -22,4 +22,28 @@ class ProductsController extends GetxController {
       products.assignAll(_tmp);
     });
   }
+
+  add(obj) {
+    _db.collection("products").add(obj).then((r) {
+      Get.back();
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+  updateProduct(id, obj) {
+    _db.collection("products").doc(id).update(obj).then((r) {
+      Get.back();
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+  delete(id) {
+    _db.collection("products").doc(id).delete().then((r) {
+      Get.back();
+    }).catchError((e) {
+      print(e);
+    });
+  }
 }

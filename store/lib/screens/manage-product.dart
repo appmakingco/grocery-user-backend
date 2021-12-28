@@ -5,6 +5,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:store/controllers/category.dart';
+import 'package:store/controllers/products.dart';
 import 'package:store/screens/login.dart';
 
 class ManageProductScreen extends StatefulWidget {
@@ -22,7 +24,9 @@ class ManageProductScreen extends StatefulWidget {
 }
 
 class _ManageProductScreenState extends State<ManageProductScreen> {
-  FirebaseFirestore _db = FirebaseFirestore.instance;
+  ProductsController _productCtrl = Get.put(ProductsController());
+  CategoryController _categoryCtrl = Get.put(CategoryController());
+
   var _categories = [];
   var _selectedId = "OzhC9yhKzN0wL10I8JBy";
   var imgURL = "https://picsum.photos/120/120";
@@ -30,54 +34,6 @@ class _ManageProductScreenState extends State<ManageProductScreen> {
   TextEditingController _titleCtrl = TextEditingController();
   TextEditingController _priceCtrl = TextEditingController();
   TextEditingController _descCtrl = TextEditingController();
-
-  fetchCategories() {
-    _db.collection("categories").snapshots().listen((event) {
-      _categories.clear();
-      var tmp = [];
-      event.docs.forEach((element) {
-        tmp.add({"id": element.id, "title": element.data()["title"]});
-      });
-      setState(() {
-        _categories = tmp;
-      });
-    });
-  }
-
-  add() {
-    _db.collection("products").add({
-      "title": _titleCtrl.text,
-      "price": _priceCtrl.text,
-      "categoryId": _selectedId,
-      "desc": _descCtrl.text
-    }).then((r) {
-      Get.back();
-    }).catchError((e) {
-      print(e);
-    });
-  }
-
-  update() {
-    _db.collection("products").doc(widget.product["id"]).update({
-      "title": _titleCtrl.text,
-      "price": _priceCtrl.text,
-      "categoryId": _selectedId,
-      "desc": _descCtrl.text,
-      "imageURL": imgURL
-    }).then((r) {
-      Get.back();
-    }).catchError((e) {
-      print(e);
-    });
-  }
-
-  delete() {
-    _db.collection("products").doc(widget.product["id"]).delete().then((r) {
-      Get.back();
-    }).catchError((e) {
-      print(e);
-    });
-  }
 
   uploadImage() async {
     var picker = ImagePicker();
@@ -111,15 +67,14 @@ class _ManageProductScreenState extends State<ManageProductScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    fetchCategories();
     if (widget.canEdit) {
       _titleCtrl.text = widget.product["title"];
-      _priceCtrl.text = widget.product["price"].toString();
+      _priceCtrl.text = (widget.product["price"]).toString();
       _descCtrl.text = widget.product["desc"];
       _selectedId = widget.product["categoryId"];
       imgURL = widget.product["imageURL"] != null
           ? widget.product["imageURL"]
-          : 'https://picsum.photos/120/120';
+          : 'http://placehold.it/120x120';
     }
   }
 
@@ -216,7 +171,21 @@ class _ManageProductScreenState extends State<ManageProductScreen> {
                     ),
                   ),
                   onPressed: () {
-                    widget.canEdit ? update() : add();
+                    widget.canEdit
+                        ? _productCtrl.updateProduct(widget.product["id"], {
+                            "title": _titleCtrl.text,
+                            "price": _priceCtrl.text,
+                            "categoryId": _selectedId,
+                            "desc": _descCtrl.text,
+                            "imageURL": imgURL
+                          })
+                        : _productCtrl.add({
+                            "title": _titleCtrl.text,
+                            "price": _priceCtrl.text,
+                            "categoryId": _selectedId,
+                            "desc": _descCtrl.text,
+                            "imageURL": imgURL
+                          });
                   },
                 ),
               ),
@@ -224,7 +193,7 @@ class _ManageProductScreenState extends State<ManageProductScreen> {
                   ? TextButton(
                       child: Text("Delete"),
                       onPressed: () {
-                        delete();
+                        _productCtrl.delete(widget.product["id"]);
                       })
                   : Container()
             ],
