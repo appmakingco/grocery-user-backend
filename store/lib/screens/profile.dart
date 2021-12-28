@@ -18,6 +18,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   FirebaseAuth _auth = FirebaseAuth.instance;
   FirebaseFirestore _db = FirebaseFirestore.instance;
+  var _profileImage = "https://picsum.photos/120/120";
 
   TextEditingController _nameCtrl = TextEditingController();
   TextEditingController _emailCtrl = TextEditingController();
@@ -33,7 +34,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   readStoreDetail() {
-    _db.collection("settings").doc("store").get().then((res) {
+    _db.collection("settings").doc("store").snapshots().listen((res) {
       print(res);
       print(res.data());
       // we need to add ! to tell value is not null
@@ -42,6 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _emailCtrl.text = res.data()!["email"];
         _mobileCtrl.text = res.data()!["mobile"];
         _addressCtrl.text = res.data()!["address"];
+        _profileImage = res.data()!["imageURL"];
       });
     });
   }
@@ -74,6 +76,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         print(res);
         res.ref.getDownloadURL().then((url) {
           print("uploaded URL" + url);
+          _db
+              .collection("settings")
+              .doc("store")
+              .update({"imageURL": url}).then((value) {
+            print("Updated");
+          }).catchError((e) {
+            print(e);
+          });
         });
       }).catchError((e) {
         print(e);
@@ -107,7 +117,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   uploadProfileImage();
                 },
                 child: CircleAvatar(
-                  backgroundImage: AssetImage("assets/images/profile.png"),
+                  backgroundImage: NetworkImage(_profileImage),
                   radius: 60,
                 ),
               ),
