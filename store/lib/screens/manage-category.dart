@@ -1,14 +1,54 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ManageCategoryScreen extends StatelessWidget {
-  ManageCategoryScreen({Key? key}) : super(key: key);
-  
+  bool canEdit = false;
+  var category = {};
+  TextEditingController _titleCtrl = TextEditingController();
+  FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  ManageCategoryScreen({
+    Key? key,
+    required this.canEdit,
+    required this.category,
+  }) : super(key: key) {
+    if (canEdit) _titleCtrl.text = category["title"];
+  }
+
+  update() {
+    _db.collection("categories").doc(category["id"]).update({
+      "title": _titleCtrl.text,
+    }).then((value) {
+      Get.back();
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+  add() {
+    _db.collection("categories").add({
+      "title": _titleCtrl.text,
+    }).then((value) {
+      Get.back();
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+  delete() {
+    _db.collection("categories").doc(category["id"]).delete().then((value) {
+      Get.back();
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Manage Category"),
+        title: Text("${canEdit ? 'Edit' : 'Add'} Category"),
       ),
       body: Container(
         padding: EdgeInsets.all(32.0),
@@ -17,6 +57,7 @@ class ManageCategoryScreen extends StatelessWidget {
         child: Column(
           children: [
             TextField(
+              controller: _titleCtrl,
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.grey[200],
@@ -34,16 +75,25 @@ class ManageCategoryScreen extends StatelessWidget {
                   primary: Colors.green,
                 ),
                 child: Text(
-                  "Save Changes",
-                  style: TextStyle(
-                    fontSize: 16,
-                  ),
+                  "${canEdit ? 'UPDATE' : 'ADD'}",
+                  style: TextStyle(fontSize: 16),
                 ),
                 onPressed: () {
-                  Get.back();
+                  canEdit ? update() : add();
                 },
               ),
             ),
+            canEdit
+                ? TextButton(
+                    child: Text(
+                      "Delete",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    onPressed: () {
+                      delete();
+                    },
+                  )
+                : Container(),
           ],
         ),
       ),
