@@ -1,12 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:store/controllers/category.dart';
 
 class ManageCategoryScreen extends StatelessWidget {
   bool canEdit = false;
   var category = {};
   TextEditingController _titleCtrl = TextEditingController();
   FirebaseFirestore _db = FirebaseFirestore.instance;
+  CategoryController _categoryCtrl = CategoryController();
 
   ManageCategoryScreen({
     Key? key,
@@ -14,34 +16,6 @@ class ManageCategoryScreen extends StatelessWidget {
     required this.category,
   }) : super(key: key) {
     if (canEdit) _titleCtrl.text = category["title"];
-  }
-
-  update() {
-    _db.collection("categories").doc(category["id"]).update({
-      "title": _titleCtrl.text,
-    }).then((value) {
-      Get.back();
-    }).catchError((e) {
-      print(e);
-    });
-  }
-
-  add() {
-    _db.collection("categories").add({
-      "title": _titleCtrl.text,
-    }).then((value) {
-      Get.back();
-    }).catchError((e) {
-      print(e);
-    });
-  }
-
-  delete() {
-    _db.collection("categories").doc(category["id"]).delete().then((value) {
-      Get.back();
-    }).catchError((e) {
-      print(e);
-    });
   }
 
   @override
@@ -79,7 +53,11 @@ class ManageCategoryScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 16),
                 ),
                 onPressed: () {
-                  canEdit ? update() : add();
+                  canEdit
+                      ? _categoryCtrl.updateCategory(category["id"], {
+                          "title": _titleCtrl.text,
+                        })
+                      : _categoryCtrl.add({"title": _titleCtrl.text});
                 },
               ),
             ),
@@ -90,7 +68,7 @@ class ManageCategoryScreen extends StatelessWidget {
                       style: TextStyle(fontSize: 16),
                     ),
                     onPressed: () {
-                      delete();
+                      _categoryCtrl.delete(category["id"]);
                     },
                   )
                 : Container(),
