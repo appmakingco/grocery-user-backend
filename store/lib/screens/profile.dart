@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store/screens/login.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -55,6 +59,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  uploadProfileImage() async {
+    var picker = ImagePicker();
+    var pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile!.path.length != 0) {
+      File image = File(pickedFile.path);
+      FirebaseStorage _storage = FirebaseStorage.instance;
+      _storage
+          .ref()
+          .child("store")
+          .child("storeImage")
+          .putFile(image)
+          .then((res) {
+        print(res);
+        res.ref.getDownloadURL().then((url) {
+          print("uploaded URL" + url);
+        });
+      }).catchError((e) {
+        print(e);
+      });
+    } else {
+      print("No file picked");
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -74,9 +102,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           width: double.infinity,
           child: Column(
             children: [
-              CircleAvatar(
-                backgroundImage: AssetImage("assets/images/profile.png"),
-                radius: 60,
+              GestureDetector(
+                onTap: () {
+                  uploadProfileImage();
+                },
+                child: CircleAvatar(
+                  backgroundImage: AssetImage("assets/images/profile.png"),
+                  radius: 60,
+                ),
               ),
               SizedBox(height: 40),
               TextField(
