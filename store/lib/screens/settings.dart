@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:store/controllers/profile.dart';
 import 'package:store/screens/profile.dart';
 
 class SettingsScreen extends StatelessWidget {
   SettingsScreen({Key? key}) : super(key: key);
+  ProfileController _profileCtrl = Get.put(ProfileController());
 
   @override
   Widget build(BuildContext context) {
@@ -14,17 +16,21 @@ class SettingsScreen extends StatelessWidget {
       body: Container(
         child: ListView(
           children: [
-            ListTile(
-              leading: CircleAvatar(
-                backgroundImage: AssetImage("assets/images/profile.png"),
-              ),
-              title: Text("Sundar Shop"),
-              subtitle: Text("234, SF St, 312"),
-              trailing: TextButton(
-                onPressed: () {
-                  Get.to(ProfileScreen());
-                },
-                child: Text("Edit"),
+            Obx(
+              () => ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(
+                    _profileCtrl.userObj["imageURL"],
+                  ),
+                ),
+                title: Text("${_profileCtrl.userObj["name"]}"),
+                subtitle: Text("${_profileCtrl.userObj["address"]}"),
+                trailing: TextButton(
+                  onPressed: () {
+                    Get.to(ProfileScreen());
+                  },
+                  child: Text("Edit"),
+                ),
               ),
             ),
             ListTile(

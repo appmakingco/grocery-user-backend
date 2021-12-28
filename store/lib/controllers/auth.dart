@@ -1,10 +1,12 @@
 import 'package:get/get.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:store/controllers/profile.dart';
 import 'package:store/screens/login.dart';
 import 'package:store/screens/tabs.dart';
 
 class AuthController extends GetxController {
+  ProfileController _profileCtrl = Get.put(ProfileController());
   FirebaseAuth _auth = FirebaseAuth.instance;
   var isUserLoggedIn = false.obs;
 
@@ -19,6 +21,7 @@ class AuthController extends GetxController {
       print(user);
       if (user != null) {
         isUserLoggedIn.value = true;
+        _profileCtrl.readStoreDetail();
       } else {
         isUserLoggedIn.value = false;
       }

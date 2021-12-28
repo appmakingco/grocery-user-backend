@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store/controllers/auth.dart';
+import 'package:store/controllers/profile.dart';
 import 'package:store/screens/login.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -17,82 +18,19 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  AuthController _auth = Get.put(AuthController());
+  static AuthController _auth = Get.put(AuthController());
+  static ProfileController _profileCtrl = Get.put(ProfileController());
 
-  FirebaseFirestore _db = FirebaseFirestore.instance;
   var _profileImage = "https://picsum.photos/120/120";
 
-  TextEditingController _nameCtrl = TextEditingController();
-  TextEditingController _emailCtrl = TextEditingController();
-  TextEditingController _mobileCtrl = TextEditingController();
-  TextEditingController _addressCtrl = TextEditingController();
-
-  readStoreDetail() {
-    _db.collection("settings").doc("store").snapshots().listen((res) {
-      print(res);
-      print(res.data());
-      // we need to add ! to tell value is not null
-      setState(() {
-        _nameCtrl.text = res.data()!["name"];
-        _emailCtrl.text = res.data()!["email"];
-        _mobileCtrl.text = res.data()!["mobile"];
-        _addressCtrl.text = res.data()!["address"];
-        _profileImage = res.data()!["imageURL"];
-      });
-    });
-  }
-
-  updateStoreDetail() {
-    _db.collection("settings").doc("store").update({
-      "address": _addressCtrl.text,
-      "mobile": _mobileCtrl.text,
-      "email": _emailCtrl.text,
-      "name": _nameCtrl.text,
-    }).then((value) {
-      print("Updated");
-    }).catchError((e) {
-      print(e);
-    });
-  }
-
-  uploadProfileImage() async {
-    var picker = ImagePicker();
-    var pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile!.path.length != 0) {
-      File image = File(pickedFile.path);
-      FirebaseStorage _storage = FirebaseStorage.instance;
-      _storage
-          .ref()
-          .child("store")
-          .child("storeImage")
-          .putFile(image)
-          .then((res) {
-        print(res);
-        res.ref.getDownloadURL().then((url) {
-          print("uploaded URL" + url);
-          _db
-              .collection("settings")
-              .doc("store")
-              .update({"imageURL": url}).then((value) {
-            print("Updated");
-          }).catchError((e) {
-            print(e);
-          });
-        });
-      }).catchError((e) {
-        print(e);
-      });
-    } else {
-      print("No file picked");
-    }
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    readStoreDetail();
-  }
+  TextEditingController _nameCtrl =
+      TextEditingController(text: _profileCtrl.userObj["name"]);
+  TextEditingController _emailCtrl =
+      TextEditingController(text: _profileCtrl.userObj["email"]);
+  TextEditingController _mobileCtrl =
+      TextEditingController(text: _profileCtrl.userObj["mobile"]);
+  TextEditingController _addressCtrl =
+      TextEditingController(text: _profileCtrl.userObj["address"]);
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +46,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               GestureDetector(
                 onTap: () {
-                  uploadProfileImage();
+                  _profileCtrl.uploadProfileImage();
                 },
                 child: CircleAvatar(
                   backgroundImage: NetworkImage(_profileImage),
@@ -172,7 +110,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   onPressed: () {
-                    updateStoreDetail();
+                    _profileCtrl.updateStoreDetail({
+                      "address": _addressCtrl.text,
+                      "mobile": _mobileCtrl.text,
+                      "email": _emailCtrl.text,
+                      "name": _nameCtrl.text,
+                    });
                   },
                 ),
               ),
