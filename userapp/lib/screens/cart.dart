@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:userapp/controllers/address.dart';
 import 'package:userapp/controllers/cart.dart';
+import 'package:userapp/controllers/orders.dart';
 import 'package:userapp/custom-widgets/cart-item.dart';
 
 class CartScreen extends StatelessWidget {
   CartScreen({Key? key}) : super(key: key);
   CartController _cartCtrl = Get.put(CartController());
   AddressController _addressCtrl = Get.put(AddressController());
+  OrderController _orderCtrl = Get.put(OrderController());
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +142,19 @@ class CartScreen extends StatelessWidget {
                           child: Obx(
                             () => Text("Checkout (₹ ${_cartCtrl.getTotal()})"),
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            Get.defaultDialog(
+                              title: "Confirmation",
+                              content: Text(
+                                  "Are You sure want to place this order?"),
+                              onConfirm: () {
+                                _orderCtrl.createOrder();
+                              },
+                              onCancel: () {
+                                Get.back();
+                              },
+                            );
+                          },
                         ),
                       ),
                     ],
