@@ -1,12 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:store/controllers/orders.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:get/get.dart';
 
 class OrderDetail extends StatelessWidget {
   Map orderObj;
-  
+  OrderController _orderCtrl = Get.put(OrderController());
+
   OrderDetail({
     Key? key,
     required this.orderObj,
   }) : super(key: key);
+  void _launchURL(url) async =>
+      await canLaunch(url) ? await launch(url) : throw 'Could not launch $url';
+
+  toDateString(timestamp) {
+    var date = DateTime.parse(timestamp.toDate().toString());
+    var formatter = DateFormat("dd-MMM-yyyy hh:mm");
+    return formatter.format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,25 +34,54 @@ class OrderDetail extends StatelessWidget {
           children: [
             ListTile(
               title: Text("Customer"),
-              subtitle: Text("Sundaravel"),
+              subtitle: Text("${orderObj["deliveryAddress"]["name"]}"),
               trailing: TextButton(
                 child: Text("Call"),
-                onPressed: () {},
+                onPressed: () {
+                  _launchURL("tel:${orderObj["deliveryAddress"]["mobile"]}");
+                },
               ),
             ),
             ListTile(
               title: Text("Order"),
-              subtitle: Text("${orderObj["dateString"]}"),
+              subtitle: Text("${toDateString(orderObj["createdAt"])}"),
               trailing: Text("#${orderObj["id"]}"),
             ),
             ListTile(
               title: Text("Status"),
               trailing: Text("${orderObj["status"]}"),
+              onTap: () {
+                Get.bottomSheet(
+                  BottomSheet(
+                    onClosing: () {},
+                    builder: (bc) => Wrap(
+                      children: [
+                        ListTile(
+                          title: Text("Mark as completed"),
+                          onTap: () {
+                            _orderCtrl.updateOrder(orderObj["id"], {
+                              "status": "COMPLETED",
+                            });
+                          },
+                        ),
+                        ListTile(
+                          title: Text("Mark as Cancelled"),
+                          onTap: () {
+                            _orderCtrl.updateOrder(orderObj["id"], {
+                              "status": "CANCELLED",
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
             ListTile(
               title: Text("Delivery"),
-              subtitle: Text("${orderObj["deliveryAddress"]}"),
-              trailing: Text("${orderObj["paymentMethod"]}"),
+              subtitle: Text("${orderObj["deliveryAddress"]["address"]}"),
+              trailing: Text("${orderObj["paymentMode"]}"),
             ),
             Container(
               margin: EdgeInsets.only(top: 8, bottom: 8),
@@ -55,16 +97,16 @@ class OrderDetail extends StatelessWidget {
             ),
             Expanded(
               child: ListView.builder(
-                itemCount: orderObj["cartItems"].length,
+                itemCount: orderObj["cart"].length,
                 itemBuilder: (bc, index) {
                   return ListTile(
                     title: Text(
-                      "${orderObj["cartItems"][index]["title"]}",
+                      "${orderObj["cart"][index]["title"]}",
                     ),
                     subtitle: Text(
-                        "Qty: ${orderObj["cartItems"][index]["qty"]} x ₹ ${orderObj["cartItems"][index]["price"]}"),
+                        "Qty: ${orderObj["cart"][index]["qty"]} x ₹ ${orderObj["cart"][index]["price"]}"),
                     trailing: Text(
-                      "₹ ${orderObj["cartItems"][index]["total"]}",
+                      "₹ ${orderObj["cart"][index]["total"]}",
                     ),
                   );
                 },
