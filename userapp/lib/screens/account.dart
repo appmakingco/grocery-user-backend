@@ -4,11 +4,21 @@ import 'package:userapp/controllers/profile.dart';
 import 'package:userapp/screens/addresses.dart';
 import 'package:userapp/screens/orders.dart';
 import 'package:userapp/screens/profile.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AccountScreen extends StatelessWidget {
   AccountScreen({Key? key}) : super(key: key);
 
   ProfileController _profileCtrl = Get.put(ProfileController());
+
+  registerPushNotification() {
+    FirebaseMessaging.instance.getToken().then((token) {
+      print(token);
+      _profileCtrl.updateProfile({"pushToken": token});
+    }).catchError((e) {
+      print(e);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,14 +43,22 @@ class AccountScreen extends StatelessWidget {
               ),
             ),
           ),
-          ListTile(
-            leading:
-                Icon(Icons.notifications_active_outlined, color: Colors.green),
-            title: Text("Notifications"),
-            subtitle: Text("Turn on / off notifications"),
-            trailing: Switch(
-              value: true,
-              onChanged: (i) {},
+          Obx(
+            () => ListTile(
+              leading: Icon(Icons.notifications_active_outlined,
+                  color: Colors.green),
+              title: Text("Notifications"),
+              subtitle: Text("Turn on/off Notification"),
+              trailing: Switch(
+                onChanged: (res) {
+                  if (res) {
+                    registerPushNotification();
+                  } else {
+                    _profileCtrl.updateProfile({"pushToken": null});
+                  }
+                },
+                value: _profileCtrl.userObj["pushToken"] != null ? true : false,
+              ),
             ),
           ),
           ListTile(
