@@ -30,6 +30,7 @@ class OrderController extends GetxController {
         _tmp.add({"id": order.id, ...order.data()});
       });
       orders.assignAll(_tmp);
+      print(orders);
     });
   }
 
