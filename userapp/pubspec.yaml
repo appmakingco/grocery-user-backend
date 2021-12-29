@@ -35,6 +35,7 @@ dependencies:
   firebase_storage: ^10.2.4
   flutter:
     sdk: flutter
+  flutter_facebook_auth: ^3.5.7
   get: ^4.6.1
   google_sign_in: ^5.2.1
   image_picker: ^0.8.4+4

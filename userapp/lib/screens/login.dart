@@ -83,7 +83,9 @@ class LoginScreen extends StatelessWidget {
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           primary: Colors.transparent, elevation: 0),
-                      onPressed: () {},
+                      onPressed: () {
+                        _auth.signInWithFacebook();
+                      },
                       child: Image.asset(
                         "assets/images/fb-icon.png",
                         height: 32,
