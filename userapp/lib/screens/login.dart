@@ -91,8 +91,12 @@ class LoginScreen extends StatelessWidget {
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                          primary: Colors.transparent, elevation: 0),
-                      onPressed: () {},
+                        primary: Colors.transparent,
+                        elevation: 0,
+                      ),
+                      onPressed: () {
+                        _auth.signInWithGoogle();
+                      },
                       child: Image.asset(
                         "assets/images/google-icon.png",
                         height: 32,
