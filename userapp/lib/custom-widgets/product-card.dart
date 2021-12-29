@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:userapp/controllers/cart.dart';
 
 class ProductCard extends StatelessWidget {
+  CartController _cartCtrl = Get.put(CartController());
+  String id;
   String imageURL;
   String title;
   double price;
 
   ProductCard({
     Key? key,
+    required this.id,
     required this.imageURL,
     required this.title,
     required this.price,
@@ -21,7 +26,7 @@ class ProductCard extends StatelessWidget {
             child: Container(
               height: double.infinity,
               width: double.infinity,
-              child: Image.asset(
+              child: Image.network(
                 imageURL,
                 fit: BoxFit.cover,
               ),
@@ -61,7 +66,15 @@ class ProductCard extends StatelessWidget {
                       Container(
                         child: ElevatedButton(
                           child: Icon(Icons.add),
-                          onPressed: () {},
+                          onPressed: () {
+                            _cartCtrl.addToCart({
+                              "id": id,
+                              "title": title,
+                              "price": price,
+                              "qty": 1,
+                              "imageURL": imageURL
+                            });
+                          },
                         ),
                       ),
                     ],

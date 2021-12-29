@@ -1,74 +1,29 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:userapp/controllers/category.dart';
+import 'package:userapp/controllers/products.dart';
 import 'package:userapp/custom-widgets/category-badge.dart';
 import 'package:userapp/custom-widgets/product-card.dart';
 
-class HomeScreen extends StatelessWidget {
-  HomeScreen({Key? key}) : super(key: key);
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
 
-  final List _products = [
-    {
-      "imageURL": "assets/images/products/1.jpg",
-      "title": "Carrot",
-      "price": 40.0,
-    },
-    {
-      "imageURL": "assets/images/products/2.jpg",
-      "title": "Gourd",
-      "price": 30.0,
-    },
-    {
-      "imageURL": "assets/images/products/3.jpg",
-      "title": "Meat",
-      "price": 400.0,
-    },
-    {
-      "imageURL": "assets/images/products/4.jpg",
-      "title": "Lettuce",
-      "price": 60.0,
-    },
-    {
-      "imageURL": "assets/images/products/5.jpg",
-      "title": "Meat Big Piece",
-      "price": 320.0,
-    },
-    {
-      "imageURL": "assets/images/products/6.jpg",
-      "title": "Pomegranate",
-      "price": 180.0,
-    },
-    {
-      "imageURL": "assets/images/products/7.jpg",
-      "title": "Strawberry",
-      "price": 540.0,
-    },
-    {
-      "imageURL": "assets/images/products/8.jpg",
-      "title": "Orange",
-      "price": 170.0,
-    },
-    {
-      "imageURL": "assets/images/products/9.jpg",
-      "title": "spinach",
-      "price": 70.0,
-    },
-    {
-      "imageURL": "assets/images/products/10.jpg",
-      "title": "Cabbage",
-      "price": 26.0,
-    },
-  ];
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
 
-  final List _categories = [
-    "All",
-    "Vegetables",
-    "Meat",
-    "Fruits",
-    "Snacks",
-    "Drinks",
-    "Oils",
-    "Daily Needs"
-  ];
+class _HomeScreenState extends State<HomeScreen> {
+  CategoryController _categoryCtrl = Get.put(CategoryController());
+  ProductsController _productsCtrl = Get.put(ProductsController());
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _categoryCtrl.fetchCategories();
+    _productsCtrl.fetchProducts();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,31 +55,39 @@ class HomeScreen extends StatelessWidget {
             ),
             Container(
               height: 40,
-              child: ListView.builder(
-                itemCount: _categories.length,
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (bc, index) {
-                  return CategoryBadge(title: "${_categories[index]}");
-                },
+              child: Obx(
+                () => ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _categoryCtrl.categories.length,
+                  itemBuilder: (bc, index) {
+                    return CategoryBadge(
+                      title: _categoryCtrl.categories[index]["title"],
+                    );
+                  },
+                ),
               ),
             ),
             Container(
-              child: GridView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
+              padding: EdgeInsets.all(8.0),
+              child: Obx(
+                () => GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemCount: _productsCtrl.products.length,
+                  itemBuilder: (bc, index) {
+                    return ProductCard(
+                      id: _productsCtrl.products[index]["id"],
+                      imageURL: _productsCtrl.products[index]["imageURL"],
+                      title: _productsCtrl.products[index]["title"],
+                      price: _productsCtrl.products[index]["price"],
+                    );
+                  },
                 ),
-                itemCount: _products.length,
-                itemBuilder: (bc, index) {
-                  return ProductCard(
-                    imageURL: _products[index]["imageURL"],
-                    title: _products[index]["title"],
-                    price: _products[index]["price"],
-                  );
-                },
               ),
             ),
           ],
