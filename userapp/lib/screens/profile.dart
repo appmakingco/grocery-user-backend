@@ -1,9 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:userapp/controllers/auth.dart';
+import 'package:userapp/controllers/profile.dart';
 import 'package:userapp/screens/welcome.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  ProfileScreen({Key? key}) : super(key: key);
+  static AuthController _auth = Get.put(AuthController());
+  static ProfileController _profileCtrl = Get.put(ProfileController());
+
+  TextEditingController _nameCtrl =
+      TextEditingController(text: _profileCtrl.userObj["name"]);
+  TextEditingController _emailCtrl =
+      TextEditingController(text: _profileCtrl.userObj["email"]);
+  TextEditingController _mobileCtrl =
+      TextEditingController(text: _profileCtrl.userObj["mobile"]);
 
   @override
   Widget build(BuildContext context) {
@@ -18,12 +29,21 @@ class ProfileScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CircleAvatar(
-                backgroundImage: AssetImage("assets/images/profile.png"),
-                radius: 60,
+              GestureDetector(
+                onTap: () {
+                  _profileCtrl.uploadProfileImage();
+                },
+                child: Obx(
+                  () => CircleAvatar(
+                    backgroundImage:
+                        NetworkImage(_profileCtrl.userObj["imageURL"]),
+                    radius: 60,
+                  ),
+                ),
               ),
               SizedBox(height: 40),
               TextField(
+                controller: _nameCtrl,
                 decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.grey[200],
@@ -32,6 +52,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               SizedBox(height: 12),
               TextField(
+                controller: _emailCtrl,
                 decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.grey[200],
@@ -40,12 +61,13 @@ class ProfileScreen extends StatelessWidget {
               ),
               SizedBox(height: 12),
               TextField(
-                obscureText: true,
+                controller: _mobileCtrl,
                 decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: InputBorder.none,
-                    labelText: "Password"),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  border: InputBorder.none,
+                  labelText: "Mobile Number",
+                ),
               ),
               SizedBox(height: 12),
               Container(
@@ -54,7 +76,11 @@ class ProfileScreen extends StatelessWidget {
                 child: ElevatedButton(
                   child: Text("Save Changes"),
                   onPressed: () {
-                    Get.back();
+                    _profileCtrl.updateProfile({
+                      "mobile": _mobileCtrl.text,
+                      "email": _emailCtrl.text,
+                      "name": _nameCtrl.text,
+                    });
                   },
                 ),
               ),
@@ -62,7 +88,7 @@ class ProfileScreen extends StatelessWidget {
                   child: TextButton(
                 child: Text("Logout"),
                 onPressed: () {
-                  Get.offAll(WelcomeScreen());
+                  _auth.logout();
                 },
               )),
             ],

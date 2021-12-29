@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:userapp/controllers/profile.dart';
 import 'package:userapp/screens/addresses.dart';
 import 'package:userapp/screens/orders.dart';
 import 'package:userapp/screens/profile.dart';
 
 class AccountScreen extends StatelessWidget {
-  const AccountScreen({Key? key}) : super(key: key);
+  AccountScreen({Key? key}) : super(key: key);
+
+  ProfileController _profileCtrl = Get.put(ProfileController());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -14,17 +18,19 @@ class AccountScreen extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          ListTile(
-            leading: CircleAvatar(
-              backgroundImage: AssetImage("assets/images/profile.png"),
-            ),
-            title: Text("Sundaravel"),
-            subtitle: Text("+9876543210"),
-            trailing: TextButton(
-              child: Text("Edit"),
-              onPressed: () {
-                Get.to(ProfileScreen());
-              },
+          Obx(
+            () => ListTile(
+              leading: CircleAvatar(
+                backgroundImage: NetworkImage(_profileCtrl.userObj["imageURL"]),
+              ),
+              title: Text("${_profileCtrl.userObj["name"]}"),
+              subtitle: Text("${_profileCtrl.userObj["mobile"]}"),
+              trailing: TextButton(
+                child: Text("Edit"),
+                onPressed: () {
+                  Get.to(ProfileScreen());
+                },
+              ),
             ),
           ),
           ListTile(

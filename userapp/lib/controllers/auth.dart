@@ -23,7 +23,7 @@ class AuthController extends GetxController {
       print(user);
       if (user != null) {
         isUserLoggedIn.value = true;
-        _profileCtrl.readStoreDetail();
+        _profileCtrl.getUserDetail(user.uid);
       } else {
         isUserLoggedIn.value = false;
       }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:userapp/screens/validate.dart';
 import 'package:userapp/screens/welcome.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: WelcomeScreen(),
+      home: ValidateScreen(),
     );
   }
 }

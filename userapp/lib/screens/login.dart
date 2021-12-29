@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:userapp/controllers/auth.dart';
 import 'package:userapp/screens/register.dart';
 import 'package:userapp/screens/tabs.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  LoginScreen({Key? key}) : super(key: key);
+
+  AuthController _auth = AuthController();
+
+  TextEditingController _emailCtrl = TextEditingController();
+  TextEditingController _passwordCtrl = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +38,7 @@ class LoginScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               SizedBox(height: 40),
               TextField(
+                controller: _emailCtrl,
                 decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.grey[200],
@@ -40,6 +47,7 @@ class LoginScreen extends StatelessWidget {
               ),
               SizedBox(height: 12),
               TextField(
+                controller: _passwordCtrl,
                 obscureText: true,
                 decoration: InputDecoration(
                     filled: true,
@@ -54,7 +62,7 @@ class LoginScreen extends StatelessWidget {
                 child: ElevatedButton(
                   child: Text("Login"),
                   onPressed: () {
-                    Get.offAll(TabScreen());
+                    _auth.login(_emailCtrl.text, _passwordCtrl.text);
                   },
                 ),
               ),
