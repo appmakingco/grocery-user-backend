@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:userapp/controllers/address.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 class ManageAddressScreen extends StatefulWidget {
   bool canEdit = false;
@@ -16,6 +21,11 @@ class ManageAddressScreen extends StatefulWidget {
 }
 
 class _ManageAddressScreenState extends State<ManageAddressScreen> {
+  double _lat = 13.0827;
+  double _lng = 80.2707;
+
+  Completer<GoogleMapController> _controller = Completer();
+
   AddressController _addressController = Get.put(AddressController());
 
   TextEditingController _tagCtrl = TextEditingController();
@@ -35,6 +45,58 @@ class _ManageAddressScreenState extends State<ManageAddressScreen> {
       _addressCtrl.text = widget.address["address"];
       _pinCtrl.text = widget.address["pincode"];
     }
+    generateAddress(_lat, _lng);
+  }
+
+  generateAddress(lat, lng) async {
+    List<Placemark> placemarkers = await placemarkFromCoordinates(lat, lng);
+    print(placemarkers[0].thoroughfare);
+
+    var addressText =
+        "${placemarkers[0].subThoroughfare}, ${placemarkers[0].thoroughfare}, ${placemarkers[0].subLocality}, ${placemarkers[0].locality}";
+
+    _addressCtrl.text = addressText;
+    _pinCtrl.text = placemarkers[0].postalCode.toString();
+  }
+
+  fetchMyLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+    if (!serviceEnabled) {
+      print("Service error");
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        print("Permission Error");
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      print("Permission deinied forever");
+    }
+
+    await Geolocator.getCurrentPosition().then((res) async {
+      final GoogleMapController controller = await _controller.future;
+
+      final _position = CameraPosition(
+        target: LatLng(res.latitude, res.longitude),
+        zoom: 12,
+      );
+      controller.animateCamera(CameraUpdate.newCameraPosition(_position));
+      setState(() {
+        _lat = res.latitude;
+        _lng = res.longitude;
+      });
+      generateAddress(_lat, _lng);
+    });
   }
 
   @override
@@ -56,12 +118,27 @@ class _ManageAddressScreenState extends State<ManageAddressScreen> {
         child: Column(
           children: [
             Container(
-                child: Image.asset(
-                  "assets/images/map.png",
-                  fit: BoxFit.cover,
+              child: GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: LatLng(_lat, _lng),
+                  zoom: 12,
                 ),
-                height: 200,
-                width: double.infinity),
+                onMapCreated: (res) {
+                  _controller.complete(res);
+                  fetchMyLocation();
+                },
+                markers: {
+                  Marker(
+                      markerId: MarkerId("current"),
+                      position: LatLng(_lat, _lng),
+                      draggable: true,
+                      onDragEnd: (latlng) {
+                        generateAddress(latlng.latitude, latlng.longitude);
+                      })
+                },
+              ),
+              height: 280,
+            ),
             Container(
               padding: EdgeInsets.all(16.0),
               child: Column(children: [

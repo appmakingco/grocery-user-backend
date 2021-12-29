@@ -37,7 +37,10 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_facebook_auth: ^3.5.7
+  geocoding: ^2.0.1
+  geolocator: ^8.0.1
   get: ^4.6.1
+  google_maps_flutter: ^2.1.1
   google_sign_in: ^5.2.1
   image_picker: ^0.8.4+4
   intl: ^0.17.0

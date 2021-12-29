@@ -1,6 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.codesundar.userapp">
     <application android:label="userapp" android:name="${applicationName}" android:icon="@mipmap/ic_launcher">
 
+        <!-- Google Map Config Start-->
+        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyCAruTijXCC4QOUhOCXQC3A1jvWKm_dPi8"/>
+        <!-- Google Map Config Start-->
+
         <!-- Facebook Config Start-->
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
         <activity android:name="com.facebook.FacebookActivity" android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation" android:label="@string/app_name" />
